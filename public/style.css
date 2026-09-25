@@ -43,3 +43,49 @@ h1{font-size:clamp(2.3rem,4.1vw,3.7rem);line-height:1.08;letter-spacing:-.065em;
 @media(max-width:850px){.landing{width:min(540px,calc(100% - 32px));margin:22px auto 20px;grid-template-columns:1fr;min-height:auto}.identity{padding:26px 26px 25px}.identity::before{top:-20%;left:-50%}.brand{margin-top:17px;height:88px}.brand-logo{width:280px}.intro{margin-top:5px}.intro-prefix{font-size:.65rem;margin-bottom:7px}h1{font-size:2.4rem}.role{margin-top:9px;font-size:.85rem}.intro-caption{margin:14px 0 0;font-size:.82rem}.contacts{border-left:0;border-top:1px solid var(--line);padding:24px 25px 23px}.section-head{margin-bottom:15px}.section-head h2{font-size:1.15rem}.link-list{gap:9px}.contact-link{min-height:66px}.contact-bottom{padding-top:20px}.site-footer{width:min(540px,calc(100% - 32px));margin-bottom:20px}}
 @media(max-width:410px){.identity{padding:22px 20px 20px}.contacts{padding:20px}.eyebrow{font-size:.59rem}.brand{height:75px}.brand-logo{width:235px}h1{font-size:2.05rem}.contact-link{gap:11px;padding:10px}.icon-wrap{width:40px;height:40px}.link-copy strong{font-size:.88rem}.link-copy small{font-size:.71rem}.contact-bottom{font-size:.52rem}.site-footer{font-size:.52rem;flex-wrap:wrap}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
+
+/* Fondo ASCII: un solo canvas detrás de la interfaz. */
+body.public{background:#04050c;isolation:isolate}
+.ascii-bg{position:fixed;inset:0;z-index:-1;pointer-events:none;background:#04050c;overflow:hidden}
+.ascii-bg canvas{display:block;width:100%;height:100%;opacity:.76}
+body.public::before{z-index:0;opacity:.06}
+.landing,.site-footer{position:relative;z-index:1}
+.landing{border-color:#6d8eca45;background:linear-gradient(145deg,#101a2ce8,#080e1bdb);box-shadow:0 28px 100px #000c,0 0 42px #385de015}
+.contacts{background:linear-gradient(155deg,#152541d1,#0d1729dc)}
+.site-footer{text-shadow:0 2px 8px #04050c}
+
+/* Cada destino tiene un color propio, con brillo focal en el icono y el borde. */
+.link-whatsapp{--accent:#31db80;--accent-rgb:49,219,128}
+.link-call{--accent:#38aaff;--accent-rgb:56,170,255}
+.link-email{--accent:#33d1f5;--accent-rgb:51,209,245}
+.link-site{--accent:#617dff;--accent-rgb:97,125,255}
+.contact-link{
+  position:relative;overflow:hidden;
+  border-color:rgba(var(--accent-rgb),.5);
+  background:linear-gradient(105deg,rgba(var(--accent-rgb),.19),rgba(var(--accent-rgb),.065) 57%,rgba(var(--accent-rgb),.035));
+  box-shadow:inset 3px 0 var(--accent),inset 0 1px rgba(var(--accent-rgb),.11),0 0 19px rgba(var(--accent-rgb),.11);
+  transition:background .2s,border-color .2s,box-shadow .2s,transform .2s
+}
+.contact-link::before{content:"";position:absolute;inset:-60% auto -60% -32%;width:57%;background:radial-gradient(ellipse,rgba(var(--accent-rgb),.18),transparent 68%);pointer-events:none}
+.contact-link:hover,.contact-link:focus-visible{
+  border-color:var(--accent);
+  background:linear-gradient(105deg,rgba(var(--accent-rgb),.27),rgba(var(--accent-rgb),.10));
+  box-shadow:inset 3px 0 var(--accent),0 0 30px rgba(var(--accent-rgb),.29),0 9px 26px #0006;
+  transform:translateY(-2px)
+}
+.contact-link:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.icon-wrap,.icon-wrap.whatsapp{
+  position:relative;
+  color:var(--accent);
+  background:rgba(var(--accent-rgb),.19);
+  border-color:rgba(var(--accent-rgb),.55);
+  box-shadow:0 0 14px rgba(var(--accent-rgb),.22),inset 0 0 14px rgba(var(--accent-rgb),.12)
+}
+.link-arrow{position:relative;color:var(--accent);text-shadow:0 0 13px rgba(var(--accent-rgb),.6)}
+.link-copy{position:relative}
+.link-copy strong{color:#fff}
+.link-copy small{color:#b6c6dc}
+@media(max-width:850px){
+  .ascii-bg canvas{opacity:.58}
+  .landing{background:linear-gradient(155deg,#101a2ced,#080e1bea)}
+}
