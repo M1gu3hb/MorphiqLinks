@@ -8,11 +8,393 @@
   <title>Miguel Huerta · Morphiq</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/style.css">
-  <script defer src="/ascii-bg.js"></script>
   <script defer src="/app.js"></script>
 </head>
 <body class="public">
-  <div class="ascii-bg" aria-hidden="true"><canvas></canvas></div>
+  <!-- Fondo ASCII animado (ASCII Shader Lab) -->
+  <div class="ascii-bg" style="position:fixed;inset:0;z-index:-1;pointer-events:none;background:#04050c">
+  <canvas style="display:block;width:100%;height:100%"></canvas>
+</div>
+<script>
+(function(){
+var ASCIIEngine = function ASCIIEngine(canvas, init, hooks){
+  hooks = hooks || {};
+  var DEF = {source:'pattern', patA:0, patB:-1, blend:0, mix:.5, scale:1, scaleB:1, speed:1, speedB:1, rot:0, warp:0, mouse:.4,
+    mediaBlend:2, mediaMix:0, fit:0, zoom:1, panX:0, panY:0, mirror:false, text:'MORPHIQ', textSize:1,
+    cell:10, aspect:1.4, dpr:1.5, charset:' .:-=+*#%@', sortDensity:true, font:'mono', weight:500, glyph:1,
+    bright:0, contrast:1, gamma:1, invert:false, dither:0, edge:0,
+    colorMode:0, colA:'#ffffff', colB:'#14142a', bg:'#05060a', sat:1, hue:0, vivid:.5, cycle:0,
+    cellBg:0, glow:0, scan:0, vig:0, paused:false, mediaSrc:''};
+  var FONTS = {mono:'ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace',
+    jetbrains:'"JetBrains Mono", monospace', plex:'"IBM Plex Mono", monospace', space:'"Space Mono", monospace',
+    fira:'"Fira Code", monospace', vt:'"VT323", monospace', courier:'"Courier New", Courier, monospace'};
+  var GF = {jetbrains:'JetBrains+Mono:wght@100..800', plex:'IBM+Plex+Mono:wght@100;200;300;400;500;600;700',
+    space:'Space+Mono:wght@400;700', fira:'Fira+Code:wght@300..700', vt:'VT323'};
+  var SANS = '"Helvetica Neue", Arial, system-ui, sans-serif';
+  var S = {}, k;
+  for (k in DEF) S[k] = DEF[k];
+  if (init) for (k in init) if (k in DEF) S[k] = init[k];
+
+  var gl = canvas.getContext('webgl', {antialias:false, alpha:false, premultipliedAlpha:false, preserveDrawingBuffer:false, powerPreference:'high-performance'}) || canvas.getContext('experimental-webgl');
+  if (!gl) { if (hooks.onError) hooks.onError('webgl'); return null; }
+
+  var HEAD = '#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#endif\n';
+  var LIB = `
+float h21(vec2 p){ p=fract(p*vec2(123.34,456.21)); p+=dot(p,p+45.32); return fract(p.x*p.y); }
+float h11(float x){ return fract(sin(x*127.1)*43758.5453); }
+float vnoise(vec2 p){ vec2 i=floor(p), f=fract(p); vec2 u=f*f*(3.-2.*f);
+  return mix(mix(h21(i),h21(i+vec2(1.,0.)),u.x), mix(h21(i+vec2(0.,1.)),h21(i+vec2(1.,1.)),u.x), u.y); }
+float fbm(vec2 p){ float v=0., a=.5; mat2 m=mat2(1.6,1.2,-1.2,1.6);
+  for(int i=0;i<5;i++){ v+=a*vnoise(p); p=m*p; a*=.5; } return v; }
+vec2 rot2(vec2 p, float a){ float c=cos(a), s=sin(a); return mat2(c,-s,s,c)*p; }
+float pattern(int id, vec2 p, float t){
+  float v=0.;
+  if(id==0){ v=fbm(p*1.8+vec2(t*.25,-t*.18)); v=smoothstep(.2,.8,v); }
+  else if(id==1){ v=.5+.5*sin(p.x*6.+sin(p.y*3.2+t*.9)*1.6+t*1.4); }
+  else if(id==2){ v=sin(p.x*4.+t)+sin(p.y*4.5+t*1.3)+sin((p.x+p.y)*3.+t*.7)+sin(length(p*5.+vec2(sin(t*.3),cos(t*.4)))-t*1.2); v=.5+.125*v; }
+  else if(id==3){ v=.5+.5*sin(length(p)*16.-t*3.); }
+  else if(id==4){ float a=atan(p.y,p.x); v=.5+.5*sin(a*3.+length(p)*12.-t*2.5); }
+  else if(id==5){ float r=max(length(p),.001); float a=atan(p.y,p.x)/6.28318;
+    v=.5+.5*sin(a*6.28318*6.)*sin((.35/r+t*.6)*6.28318); v*=smoothstep(0.,.45,r); }
+  else if(id==6){ vec2 g=p*3.5; vec2 i=floor(g); vec2 f=fract(g); float md=8.;
+    for(int y=-1;y<=1;y++){ for(int x=-1;x<=1;x++){ vec2 o=vec2(float(x),float(y));
+      vec2 r=vec2(h21(i+o),h21(i+o+17.3)); r=.5+.4*sin(t*.7+6.28318*r); md=min(md,length(o+r-f)); } }
+    v=clamp(md*1.15,0.,1.); }
+  else if(id==7){ float c=floor(p.x*22.); float sp=.35+h11(c)*1.1; float y=p.y*.9+t*sp+h11(c+7.)*13.;
+    v=pow(fract(y),5.)*step(.15,h11(c+3.1)); }
+  else if(id==8){ float s=0.; for(int i=0;i<6;i++){ float fi=float(i);
+      vec2 c=.65*vec2(sin(t*(.45+fi*.13)+fi*1.7),cos(t*(.38+fi*.17)+fi*2.3)); vec2 d=p-c; s+=.035/(dot(d,d)+.001); }
+    v=smoothstep(.5,2.4,s); }
+  else if(id==9){ v=clamp(.5+.45*p.x+.12*sin(p.y*2.+t),0.,1.); }
+  else if(id==10){ v=.5+.5*sin(p.x*7.+t)*sin(p.y*7.-t*.6); }
+  else if(id==11){ float a=atan(p.y,p.x); v=.5+.5*sin(a*10.+t*1.4); v*=clamp(1.15-length(p)*.6,0.,1.); }
+  else if(id==12){ vec2 o=vec2(.45*sin(t*.5),.2*cos(t*.4)); v=.5+.25*(sin(length(p-o)*28.-t*2.)+sin(length(p+o)*28.-t*2.)); }
+  else if(id==13){ for(int k=0;k<2;k++){ float fk=float(k); vec2 g=p*(14.+fk*9.)+vec2(0.,t*(.6+fk*.9)); vec2 i=floor(g);
+      float h=h21(i+fk*31.); vec2 f=fract(g)-.5-(vec2(h21(i+3.1),h21(i+9.7))-.5)*.5;
+      v+=smoothstep(.3,0.,length(f))*step(.86,h)*(.55+.45*sin(t*3.+h*60.)); }
+    v=clamp(v,0.,1.); }
+  else if(id==14){ float n=fbm(vec2(p.x*2.6,p.y*1.8-t*1.4)); v=clamp(n*1.5-(p.y+.35)*.9,0.,1.); }
+  else { v=.5+.5*sin(max(abs(p.x),abs(p.y))*18.-t*3.); }
+  return v;
+}
+float blendf(float a, float b, int m, float k){
+  float r=b;
+  if(m==1) r=a+b; else if(m==2) r=a*b; else if(m==3) r=abs(a-b); else if(m==4) r=max(a,b);
+  else if(m==5) r=min(a,b); else if(m==6) r=1.-(1.-a)*(1.-b);
+  else if(m==7) r=a<.5?2.*a*b:1.-2.*(1.-a)*(1.-b);
+  return clamp(mix(a,r,k),0.,1.);
+}`;
+  var FS1 = HEAD + `
+uniform vec2 uRes, uCell, uMediaSize, uPan, uMouse;
+uniform float uTime, uZoom, uMirror, uMix, uScale, uScaleB, uSpeedB, uWarp, uRot, uMediaMix, uMouseAmt;
+uniform int uSource, uFit, uPatA, uPatB, uBlend, uMediaBlend;
+uniform sampler2D uMedia;
+` + LIB + `
+vec3 media(vec2 s){
+  float ca=uRes.x/uRes.y; float ma=uMediaSize.x/max(uMediaSize.y,1.);
+  vec2 k=vec2(1.);
+  if(uFit==0){ k = ca>ma ? vec2(1.,ma/ca) : vec2(ca/ma,1.); }
+  else if(uFit==1){ k = ca>ma ? vec2(ca/ma,1.) : vec2(1.,ma/ca); }
+  vec2 uv=(s-.5)*k/uZoom+.5+uPan;
+  if(uMirror>.5) uv.x=1.-uv.x;
+  if(uv.x<0.||uv.y<0.||uv.x>1.||uv.y>1.) return vec3(0.);
+  return texture2D(uMedia,uv).rgb;
+}
+void main(){
+  vec2 px=gl_FragCoord.xy*uCell;
+  vec2 p=(px-.5*uRes)/uRes.y;
+  vec2 m=(uMouse-.5*uRes)/uRes.y;
+  float t=uTime;
+  vec2 q=rot2(p,uRot)*uScale;
+  if(uWarp>0.) q+=uWarp*(vec2(fbm(q*1.2+t*.15),fbm(q*1.2+vec2(5.2,1.3)-t*.15))-.5)*2.;
+  float v=pattern(uPatA,q,t);
+  if(uPatB>=0){ float b=pattern(uPatB,q*uScaleB,t*uSpeedB); v=blendf(v,b,uBlend,uMix); }
+  vec3 col=vec3(v); float l=v;
+  if(uSource==1){
+    vec2 s=px/uRes; s.y=1.-s.y;
+    vec2 cs=uCell/uRes*.25;
+    vec3 c=(media(s+vec2(-cs.x,-cs.y))+media(s+vec2(cs.x,-cs.y))+media(s+vec2(-cs.x,cs.y))+media(s+cs))*.25;
+    col=c; float ml=dot(c,vec3(.299,.587,.114));
+    l = uMediaMix>0. ? blendf(ml,v,uMediaBlend,uMediaMix) : ml;
+  }
+  float d=length(p-m);
+  l=clamp(l+uMouseAmt*exp(-d*d*10.)*(.7+.3*sin(d*40.-t*6.)),0.,1.);
+  gl_FragColor=vec4(col,l);
+}`;
+  var FS2 = HEAD + `
+uniform vec2 uRes, uCell, uGrid, uAtlasGrid;
+uniform sampler2D uData, uAtlas;
+uniform float uN, uEdgeBase, uBright, uContrast, uGamma, uInvert, uDither, uEdge, uSat, uHue, uVivid, uCycle, uTime, uCellBg, uGlow, uGlyph, uScan, uVig;
+uniform int uMode, uIsMedia;
+uniform vec3 uColA, uColB, uBg;
+float bayer2(vec2 a){ a=floor(a); return fract(dot(a,vec2(.5,a.y*.75))); }
+float bayer4(vec2 a){ return bayer2(.5*a)*.25+bayer2(a); }
+vec3 hueShift(vec3 c, float a){ vec3 k=vec3(.57735); float ca=cos(a); return c*ca+cross(k,c)*sin(a)+k*dot(k,c)*(1.-ca); }
+float tone(float l){ l=(l-.5)*uContrast+.5+uBright; l=clamp(l,0.,1.); l=pow(l,uGamma); return mix(l,1.-l,uInvert); }
+float L(vec2 c){ return tone(texture2D(uData,(c+.5)/uGrid).a); }
+void main(){
+  vec2 fc=gl_FragCoord.xy;
+  vec2 cell=floor(fc/uCell);
+  vec2 lc=fract(fc/uCell);
+  vec4 d=texture2D(uData,(cell+.5)/uGrid);
+  float l=tone(d.a);
+  float lq=clamp(l+(bayer4(cell)-.5)*uDither/max(uN-1.,1.),0.,1.);
+  float idx=floor(lq*(uN-1.)+.5);
+  if(uEdge>0.){
+    float tl=L(cell+vec2(-1.,1.)), tc=L(cell+vec2(0.,1.)), tr=L(cell+vec2(1.,1.));
+    float ml=L(cell+vec2(-1.,0.)), mr=L(cell+vec2(1.,0.));
+    float bl=L(cell+vec2(-1.,-1.)), bc=L(cell+vec2(0.,-1.)), br=L(cell+vec2(1.,-1.));
+    float gx=(tr+2.*mr+br)-(tl+2.*ml+bl);
+    float gy=(tl+2.*tc+tr)-(bl+2.*bc+br);
+    if(length(vec2(gx,gy))>mix(2.2,.12,uEdge)){
+      float a=atan(gy,gx); if(a<0.) a+=3.14159265;
+      idx=uEdgeBase+mod(floor(a/.7853982+.5),4.);
+    }
+  }
+  vec2 g=(lc-.5)/uGlyph+.5;
+  float glyph=0.;
+  if(g.x>0.&&g.y>0.&&g.x<1.&&g.y<1.){
+    vec2 ac=vec2(floor(mod(idx+.5,uAtlasGrid.x)),floor((idx+.5)/uAtlasGrid.x));
+    glyph=texture2D(uAtlas,(ac+vec2(g.x,1.-g.y))/uAtlasGrid).a;
+  }
+  vec3 pal=.5+.5*cos(6.28318*(vec3(0.,.33,.67)+l*.85+uHue+uTime*uCycle));
+  vec3 base;
+  if(uMode==0) base=uColA;
+  else if(uMode==1) base=mix(uColB,uColA,l);
+  else if(uMode==2) base=pal;
+  else {
+    if(uIsMedia==1){ base=d.rgb; float mx=max(max(base.r,base.g),base.b); base=mix(base,base/max(mx,.04),uVivid); base=hueShift(base,uHue*6.28318); }
+    else base=pal;
+  }
+  if(uMode>=2){ float gr=dot(base,vec3(.299,.587,.114)); base=clamp(mix(vec3(gr),base,uSat),0.,1.); }
+  vec3 bgc=mix(uBg,base*l,uCellBg);
+  vec2 cc=lc-.5;
+  vec3 glow=base*l*uGlow*exp(-dot(cc,cc)*7.)*.55;
+  vec3 col=mix(bgc+glow,base,glyph);
+  col*=1.-uScan*.4*(.5+.5*cos(fc.y*1.5708));
+  vec2 vv=fc/uRes-.5; col*=1.-uVig*dot(vv,vv)*2.2;
+  gl_FragColor=vec4(clamp(col,0.,1.),1.);
+}`;
+  var VS = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
+  function compile(type, src){
+    var s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) { var log = gl.getShaderInfoLog(s); if (hooks.onError) hooks.onError(log); throw new Error(log); }
+    return s;
+  }
+  function program(fs){
+    var p = gl.createProgram();
+    gl.attachShader(p, compile(gl.VERTEX_SHADER, VS)); gl.attachShader(p, compile(gl.FRAGMENT_SHADER, fs));
+    gl.bindAttribLocation(p, 0, 'p'); gl.linkProgram(p);
+    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) { var log = gl.getProgramInfoLog(p); if (hooks.onError) hooks.onError(log); throw new Error(log); }
+    p.u = {}; return p;
+  }
+  var P1, P2;
+  try { P1 = program(FS1); P2 = program(FS2); } catch (e) { return null; }
+
+  var buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,3,-1,-1,3]), gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false); gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+  function mkTex(filter){
+    var t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0,0,0,0]));
+    return t;
+  }
+  var atlasTex = mkTex(gl.LINEAR), mediaTex = mkTex(gl.LINEAR), dataTex = mkTex(gl.NEAREST), fbo = gl.createFramebuffer();
+
+  var W=1, H=1, cw=8, ch=8, cols=1, rows=1;
+  var needResize=true, atlasDirty=true, textDirty=true, mediaDirty=true, mediaOK=false;
+  var atlas = {cols:1, rows:1, n:1, edge:1};
+  var slots = {image:null, video:null, camera:null}, mW=1, mH=1;
+  var tcv = document.createElement('canvas'), tctx = tcv.getContext('2d');
+  var mouse=[-5000,-5000], mt=[-5000,-5000];
+  var tt=0, last=0, raf=0, alive=true, frames=0, fps=0, fpsT=0;
+
+  function rgb(h){ h = String(h||'#000').replace('#',''); if (h.length===3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+    var n = parseInt(h,16)||0; return [(n>>16&255)/255, (n>>8&255)/255, (n&255)/255]; }
+  function U(p,n){ if (!(n in p.u)) p.u[n] = gl.getUniformLocation(p,n); return p.u[n]; }
+  function f1(p,n,a){ gl.uniform1f(U(p,n),a); }
+  function f2(p,n,a,b){ gl.uniform2f(U(p,n),a,b); }
+  function f3(p,n,c){ gl.uniform3f(U(p,n),c[0],c[1],c[2]); }
+  function i1(p,n,a){ gl.uniform1i(U(p,n),a); }
+  function stack(){ return FONTS[S.font] || FONTS.mono; }
+
+  function ensureFont(){
+    var f = S.font; if (!GF[f]) return;
+    var fam = FONTS[f].split(',')[0];
+    var go = function(){ if (document.fonts && document.fonts.load) document.fonts.load(S.weight+' 40px '+fam).then(function(){ atlasDirty=true; }, function(){}); };
+    var l = document.querySelector('link[data-ascii-font="'+f+'"]');
+    if (!l) { l = document.createElement('link'); l.rel='stylesheet'; l.href='https://fonts.googleapis.com/css2?family='+GF[f]+'&display=block';
+      l.setAttribute('data-ascii-font', f); l.onload = go; document.head.appendChild(l); }
+    else go();
+  }
+
+  function buildAtlas(){
+    atlasDirty = false;
+    var seen = {}, chars = [];
+    Array.from(String(S.charset||'')).forEach(function(c){ if (c==='\n'||c==='\r'||c==='\t') return; if (!seen[c]) { seen[c]=1; chars.push(c); } });
+    if (!chars.length) chars = [' ', '#'];
+    var G = 48, GH = Math.max(16, Math.round(G*S.aspect));
+    var fs = Math.round(Math.min(GH*.82, G*1.55));
+    var font = S.weight+' '+fs+'px '+stack();
+    var cv = document.createElement('canvas'), cx = cv.getContext('2d', {willReadFrequently:true});
+    function draw(list){
+      var n = list.length, ac = Math.min(16, n), ar = Math.ceil(n/ac);
+      cv.width = ac*G; cv.height = ar*GH;
+      cx.clearRect(0,0,cv.width,cv.height); cx.font = font; cx.fillStyle='#fff'; cx.textAlign='center'; cx.textBaseline='middle';
+      list.forEach(function(c,i){ cx.fillText(c, (i%ac)*G+G/2, Math.floor(i/ac)*GH+GH/2+fs*.04); });
+      return {ac:ac, ar:ar};
+    }
+    if (S.sortDensity && chars.length > 1) {
+      var g = draw(chars), data = cx.getImageData(0,0,cv.width,cv.height).data;
+      var dens = chars.map(function(c,i){ var x0=(i%g.ac)*G, y0=Math.floor(i/g.ac)*GH, s=0;
+        for (var y=y0; y<y0+GH; y+=2) for (var x=x0; x<x0+G; x+=2) s += data[(y*cv.width+x)*4+3]; return s; });
+      chars = chars.map(function(c,i){ return [c,dens[i],i]; }).sort(function(a,b){ return a[1]-b[1] || a[2]-b[2]; }).map(function(a){ return a[0]; });
+    }
+    var list = chars.concat(['|','\\','-','/']);
+    var g2 = draw(list);
+    gl.bindTexture(gl.TEXTURE_2D, atlasTex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, cv);
+    atlas = {cols:g2.ac, rows:g2.ar, n:chars.length, edge:chars.length};
+  }
+
+  function buildText(){
+    textDirty = false;
+    var w = Math.max(64, Math.min(1600, W)), h = Math.max(32, Math.round(w*H/Math.max(W,1)));
+    tcv.width = w; tcv.height = h;
+    var c = tctx; c.fillStyle='#000'; c.fillRect(0,0,w,h);
+    var lines = String(S.text||'').split('\n');
+    c.font = '900 100px '+SANS; var mw = 1;
+    lines.forEach(function(l){ mw = Math.max(mw, c.measureText(l).width); });
+    var fs = Math.min(100*w*.9/mw, h*.86/(lines.length*1.02)) * S.textSize;
+    c.font = '900 '+fs+'px '+SANS; c.fillStyle='#fff'; c.textAlign='center'; c.textBaseline='middle';
+    var lh = fs*1.02, y0 = h/2-(lines.length-1)*lh/2;
+    lines.forEach(function(l,i){ c.fillText(l, w/2, y0+i*lh); });
+    mediaDirty = true;
+  }
+
+  function current(){ if (S.source==='text') return tcv; return slots[S.source] || null; }
+  function uploadMedia(){
+    var el = current(); if (!el) { mediaOK = false; return; }
+    var vid = (typeof HTMLVideoElement !== 'undefined') && (el instanceof HTMLVideoElement);
+    if (vid) { if (el.readyState < 2 || !el.videoWidth) return; mW = el.videoWidth; mH = el.videoHeight; }
+    else { if (!mediaDirty && mediaOK) return; mW = el.naturalWidth || el.width || 1; mH = el.naturalHeight || el.height || 1; }
+    gl.bindTexture(gl.TEXTURE_2D, mediaTex);
+    try { gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, el); mediaOK = true; mediaDirty = false; }
+    catch (e) { mediaOK = false; }
+  }
+
+  function resize(){
+    needResize = false;
+    var d = Math.min(S.dpr, Math.max(1, window.devicePixelRatio || 1));
+    var cw0 = canvas.clientWidth || 300, ch0 = canvas.clientHeight || 150;
+    W = Math.max(1, Math.round(cw0*d)); H = Math.max(1, Math.round(ch0*d));
+    if (canvas.width !== W) canvas.width = W; if (canvas.height !== H) canvas.height = H;
+    cw = Math.max(2, Math.round(S.cell*d)); ch = Math.max(2, Math.round(S.cell*S.aspect*d));
+    cols = Math.ceil(W/cw); rows = Math.ceil(H/ch);
+    gl.bindTexture(gl.TEXTURE_2D, dataTex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, cols, rows, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, dataTex, 0);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    textDirty = true;
+  }
+
+  function render(){
+    if (needResize) resize();
+    if (atlasDirty) buildAtlas();
+    if (S.source === 'text' && textDirty) buildText();
+    uploadMedia();
+    var useM = S.source !== 'pattern' && mediaOK;
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo); gl.viewport(0,0,cols,rows); gl.useProgram(P1);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, mediaTex); i1(P1,'uMedia',0);
+    f2(P1,'uRes',W,H); f2(P1,'uCell',cw,ch); f1(P1,'uTime',tt);
+    i1(P1,'uSource',useM?1:0); f2(P1,'uMediaSize',mW,mH); i1(P1,'uFit',+S.fit); f1(P1,'uZoom',S.zoom);
+    f2(P1,'uPan',S.panX,S.panY); f1(P1,'uMirror',S.mirror?1:0);
+    i1(P1,'uPatA',+S.patA); i1(P1,'uPatB',+S.patB); i1(P1,'uBlend',+S.blend); f1(P1,'uMix',S.mix);
+    f1(P1,'uScale',S.scale); f1(P1,'uScaleB',S.scaleB); f1(P1,'uSpeedB',S.speedB); f1(P1,'uWarp',S.warp); f1(P1,'uRot',S.rot*Math.PI/180);
+    i1(P1,'uMediaBlend',+S.mediaBlend); f1(P1,'uMediaMix',S.mediaMix);
+    f2(P1,'uMouse',mouse[0],mouse[1]); f1(P1,'uMouseAmt',S.mouse);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.viewport(0,0,W,H); gl.useProgram(P2);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, dataTex); i1(P2,'uData',0);
+    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, atlasTex); i1(P2,'uAtlas',1);
+    f2(P2,'uRes',W,H); f2(P2,'uCell',cw,ch); f2(P2,'uGrid',cols,rows); f2(P2,'uAtlasGrid',atlas.cols,atlas.rows);
+    f1(P2,'uN',atlas.n); f1(P2,'uEdgeBase',atlas.edge);
+    f1(P2,'uBright',S.bright); f1(P2,'uContrast',S.contrast); f1(P2,'uGamma',S.gamma); f1(P2,'uInvert',S.invert?1:0);
+    f1(P2,'uDither',S.dither); f1(P2,'uEdge',S.edge);
+    i1(P2,'uMode',+S.colorMode); i1(P2,'uIsMedia',useM?1:0);
+    f3(P2,'uColA',rgb(S.colA)); f3(P2,'uColB',rgb(S.colB)); f3(P2,'uBg',rgb(S.bg));
+    f1(P2,'uSat',S.sat); f1(P2,'uHue',S.hue); f1(P2,'uVivid',S.vivid); f1(P2,'uCycle',S.cycle); f1(P2,'uTime',tt);
+    f1(P2,'uCellBg',S.cellBg); f1(P2,'uGlow',S.glow); f1(P2,'uGlyph',S.glyph); f1(P2,'uScan',S.scan); f1(P2,'uVig',S.vig);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
+  function frame(now){
+    if (!alive) return;
+    raf = requestAnimationFrame(frame);
+    var dt = last ? Math.min(.1, (now-last)/1000) : 0; last = now;
+    if (!S.paused) tt += dt*S.speed;
+    var dx = mt[0]-mouse[0], dy = mt[1]-mouse[1];
+    if (Math.abs(dx) > W*1.5 || Math.abs(dy) > H*1.5) { mouse[0]=mt[0]; mouse[1]=mt[1]; }
+    else { var a = Math.min(1, dt*9); mouse[0]+=dx*a; mouse[1]+=dy*a; }
+    render();
+    frames++; if (now-fpsT > 500) { fps = Math.round(frames*1000/(now-fpsT)); frames = 0; fpsT = now; }
+  }
+
+  function onMove(e){ var r = canvas.getBoundingClientRect(); if (!r.width) return;
+    mt = [(e.clientX-r.left)*W/r.width, (r.bottom-e.clientY)*H/r.height]; }
+  function onOut(e){ if (!e.relatedTarget) mt = [-5000,-5000]; }
+  function onBlur(){ mt = [-5000,-5000]; }
+  function onWinResize(){ needResize = true; }
+  window.addEventListener('pointermove', onMove, {passive:true});
+  window.addEventListener('pointerdown', onMove, {passive:true});
+  document.addEventListener('mouseout', onOut);
+  window.addEventListener('blur', onBlur);
+  var ro = (typeof ResizeObserver !== 'undefined') ? new ResizeObserver(onWinResize) : null;
+  if (ro) ro.observe(canvas); else window.addEventListener('resize', onWinResize);
+
+  if (S.mediaSrc && (S.source === 'image' || S.source === 'video')) {
+    if (S.source === 'image') { var im = new Image(); im.crossOrigin = 'anonymous'; im.onload = function(){ slots.image = im; mediaDirty = true; mediaOK = false; }; im.src = S.mediaSrc; }
+    else { var v = document.createElement('video'); v.crossOrigin = 'anonymous'; v.muted = true; v.loop = true; v.playsInline = true;
+      v.setAttribute('playsinline',''); v.autoplay = true; v.src = S.mediaSrc; var pr = v.play && v.play(); if (pr && pr.catch) pr.catch(function(){}); slots.video = v; }
+  }
+
+  var api = {
+    set: function(p){
+      var rs=false, at=false, tx=false, ft=false;
+      for (var k in p) {
+        if (!(k in DEF) || S[k] === p[k]) continue;
+        S[k] = p[k];
+        if (k==='cell'||k==='aspect'||k==='dpr') rs = true;
+        if (k==='charset'||k==='font'||k==='weight'||k==='sortDensity'||k==='aspect') at = true;
+        if (k==='text'||k==='textSize'||k==='source') tx = true;
+        if (k==='source') { mediaDirty = true; mediaOK = false; }
+        if (k==='font'||k==='weight') ft = true;
+      }
+      if (rs) needResize = true; if (at) atlasDirty = true; if (tx) textDirty = true; if (ft) ensureFont();
+    },
+    get: function(){ var o = {}; for (var k in S) o[k] = S[k]; return o; },
+    defaults: function(){ var o = {}; for (var k in DEF) o[k] = DEF[k]; return o; },
+    setMedia: function(el, kind){ slots[kind] = el; if (S.source === kind) { mediaDirty = true; mediaOK = false; } },
+    hasMedia: function(kind){ return !!slots[kind]; },
+    info: function(){ return {cols:cols, rows:rows, fps:fps}; },
+    snapshot: function(cb){ render(); canvas.toBlob(cb, 'image/png'); },
+    destroy: function(){ alive = false; cancelAnimationFrame(raf); window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerdown', onMove);
+      document.removeEventListener('mouseout', onOut); window.removeEventListener('blur', onBlur); if (ro) ro.disconnect(); else window.removeEventListener('resize', onWinResize); }
+  };
+  ensureFont();
+  raf = requestAnimationFrame(frame);
+  return api;
+};
+var c = document.currentScript.previousElementSibling.querySelector("canvas");
+ASCIIEngine(c, {"source":"pattern","patA":0,"patB":8,"blend":0,"mix":0.65,"scale":1.1,"scaleB":0.9,"speed":0.6,"speedB":1,"rot":0,"warp":0.55,"mouse":0.4,"mediaBlend":2,"mediaMix":0,"fit":0,"zoom":1,"panX":0,"panY":0,"mirror":false,"text":"MORPHIQ","textSize":1,"cell":12,"aspect":1.4,"dpr":1,"charset":" .'`^\",:;Il!i>\u003c~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$","sortDensity":true,"font":"mono","weight":500,"glyph":1,"bright":0,"contrast":1.15,"gamma":1,"invert":false,"dither":0.35,"edge":0,"colorMode":1,"colA":"#0000ff","colB":"#ffffff","bg":"#04050c","sat":0.85,"hue":0.055,"vivid":0.5,"cycle":0.02,"cellBg":0,"glow":0.35,"scan":0,"vig":0.45,"paused":false});
+})();
+</script>
   <main class="landing">
     <section class="identity" aria-label="Miguel Huerta Bautista, Morphiq">
       <div class="eyebrow"><span class="small-mark" aria-hidden="true">M</span> MORPHIQ <span class="eyebrow-line"></span> CONTACTO DIRECTO</div>

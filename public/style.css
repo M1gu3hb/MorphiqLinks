@@ -47,8 +47,8 @@ h1{font-size:clamp(2.3rem,4.1vw,3.7rem);line-height:1.08;letter-spacing:-.065em;
 /* Fondo ASCII: un solo canvas detrás de la interfaz. */
 body.public{background:#04050c;isolation:isolate}
 .ascii-bg{position:fixed;inset:0;z-index:-1;pointer-events:none;background:#04050c;overflow:hidden}
-.ascii-bg canvas{display:block;width:100%;height:100%;opacity:.76}
-body.public::before{z-index:0;opacity:.06}
+.ascii-bg canvas{display:block;width:100%;height:100%}
+body.public::before{display:none}
 .landing,.site-footer{position:relative;z-index:1}
 .landing{border-color:#6d8eca45;background:linear-gradient(145deg,#101a2ce8,#080e1bdb);box-shadow:0 28px 100px #000c,0 0 42px #385de015}
 .contacts{background:linear-gradient(155deg,#152541d1,#0d1729dc)}
@@ -86,6 +86,5 @@ body.public::before{z-index:0;opacity:.06}
 .link-copy strong{color:#fff}
 .link-copy small{color:#b6c6dc}
 @media(max-width:850px){
-  .ascii-bg canvas{opacity:.58}
   .landing{background:linear-gradient(155deg,#101a2ced,#080e1bea)}
 }
