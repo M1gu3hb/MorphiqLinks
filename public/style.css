@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Syne:wght@600;700;800&display=swap');
 :root{color-scheme:dark;--bg:#090d16;--panel:#101827;--ink:#f4f6fb;--muted:#929eb0;--blue:#4199ff;--line:#293448;font-family:Manrope,Arial,sans-serif}
 *{box-sizing:border-box}
 html{min-height:100%}
@@ -18,7 +18,7 @@ button,input{font:inherit}
 .brand-logo{width:min(325px,100%);height:auto;mix-blend-mode:screen;filter:saturate(.9)}
 .intro{margin-top:auto;position:relative}
 .intro-prefix{color:var(--blue);margin:0 0 11px}
-h1{font-size:clamp(2.3rem,4.1vw,3.7rem);line-height:1.08;letter-spacing:-.065em;margin:0;font-weight:800}
+h1{font-family:Syne,Manrope,Arial,sans-serif;font-size:clamp(2.65rem,4.3vw,3.95rem);line-height:1.04;letter-spacing:-.055em;margin:0;font-weight:700;text-shadow:0 5px 25px #000a}
 .blue-dot{color:var(--blue)}
 .role{font-size:.96rem;line-height:1.6;color:#c2cada;margin:18px 0 0}
 .intro-caption{font-size:.9rem;color:var(--muted);margin:31px 0 0}
@@ -50,8 +50,8 @@ body.public{background:#04050c;isolation:isolate}
 .ascii-bg canvas{display:block;width:100%;height:100%}
 body.public::before{display:none}
 .landing,.site-footer{position:relative;z-index:1}
-.landing{border-color:#6d8eca45;background:linear-gradient(145deg,#101a2ce8,#080e1bdb);box-shadow:0 28px 100px #000c,0 0 42px #385de015}
-.contacts{background:linear-gradient(155deg,#152541d1,#0d1729dc)}
+.landing{border-color:#80a5d366;background:linear-gradient(145deg,#101a2c99,#080e1b8f);box-shadow:0 28px 100px #000b,0 0 42px #385de015}
+.contacts{background:linear-gradient(155deg,#15254138,#0d17294d)}
 .site-footer{text-shadow:0 2px 8px #04050c}
 
 /* Cada destino tiene un color propio, con brillo focal en el icono y el borde. */
@@ -86,5 +86,5 @@ body.public::before{display:none}
 .link-copy strong{color:#fff}
 .link-copy small{color:#b6c6dc}
 @media(max-width:850px){
-  .landing{background:linear-gradient(155deg,#101a2ced,#080e1bea)}
+  .landing{background:linear-gradient(155deg,#101a2caa,#080e1ba8)}
 }
