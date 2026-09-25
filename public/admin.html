@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#090d16">
+  <title>Estadísticas · Morphiq Links</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/admin.css">
+  <script defer src="/admin.js"></script>
+</head>
+<body class="admin">
+  <header class="admin-header"><a href="/" class="admin-brand"><span class="small-mark">M</span> MORPHIQ <span class="admin-brand-sub">/ LINKS</span></a><span class="header-right">PANEL PRIVADO <button type="button" id="logout" hidden>Salir</button></span></header>
+  <main class="admin-main">
+    <section class="login-card" id="login-screen">
+      <span class="kicker">ACCESO / 01</span>
+      <h1>Tu panel de<br>contactos<span class="blue-dot">.</span></h1>
+      <p>Revisa las visitas y los clics de tu tarjeta.</p>
+      <form id="login-form">
+        <label for="password">Contraseña</label>
+        <input type="password" id="password" name="password" autocomplete="current-password" required>
+        <button class="primary" type="submit">Entrar al panel <span aria-hidden="true">↗</span></button>
+        <p class="form-error" id="login-error" role="alert"></p>
+      </form>
+    </section>
+    <section class="dashboard" id="dashboard" hidden>
+      <div class="dashboard-title"><div><span class="kicker">MORPHIQ LINKS / ANALÍTICA</span><h1>Actividad de tus enlaces<span class="blue-dot">.</span></h1><p id="tz-note">Horario de Ciudad de México · Las visitas son sesiones, no personas únicas.</p></div><button id="refresh" type="button" class="outline">Actualizar ↻</button></div>
+      <div class="overview">
+        <div class="stat"><span>VISITAS HOY</span><strong id="visits-today">0</strong><small>sesiones registradas</small></div>
+        <div class="stat"><span>CLICS HOY</span><strong id="clicks-today">0</strong><small>entre todos los destinos</small></div>
+        <div class="stat"><span>INTERACCIÓN HOY</span><strong id="engagement-today">0%</strong><small>sesiones con al menos un destino</small></div>
+        <div class="stat"><span>VISITAS HISTÓRICAS</span><strong id="visits-all">0</strong><small>desde el primer registro</small></div>
+      </div>
+      <div class="dashboard-grid">
+        <article class="data-card chart-card"><div class="card-heading"><div><span class="kicker">EVOLUCIÓN</span><h2>Visitas y clics</h2></div><span>Últimos 30 días</span></div><div class="chart-legend"><span><i class="legend-visits"></i> Visitas</span><span><i class="legend-clicks"></i> Clics</span></div><div id="chart" class="chart" role="img" aria-label="Gráfica de visitas y clics diarios"></div></article>
+        <article class="data-card"><div class="card-heading"><div><span class="kicker">DESTINOS</span><h2>Clics de hoy</h2></div></div><div id="links-today" class="destination-list"></div></article>
+        <article class="data-card"><div class="card-heading"><div><span class="kicker">PREFERENCIAS</span><h2>Ranking histórico</h2></div></div><div id="ranking" class="ranking"></div></article>
+        <article class="data-card"><div class="card-heading"><div><span class="kicker">PROFUNDIDAD</span><h2>Enlaces abiertos</h2></div><span>Histórico de sesiones</span></div><div id="depth" class="depth"></div><p class="card-note">Cuenta destinos distintos por sesión en un mismo día; abrir el mismo enlace varias veces suma clics, pero no más destinos.</p></article>
+      </div>
+      <article class="data-card history"><div class="card-heading"><div><span class="kicker">REGISTRO DIARIO</span><h2>Historial completo</h2></div><span id="history-count"></span></div><div class="table-scroll"><table><thead><tr><th>Fecha</th><th>Visitas</th><th>WhatsApp</th><th>Llamada</th><th>Correo</th><th>Sitio web</th><th>Total clics</th></tr></thead><tbody id="history-body"></tbody></table></div></article>
+      <p class="dashboard-foot">Se contabilizan sesiones anónimas. El navegador y los bloqueadores pueden impedir algunos registros; los clics cuentan la apertura del enlace, no si se completó una llamada o se envió un mensaje.</p>
+    </section>
+  </main>
+</body>
+</html>

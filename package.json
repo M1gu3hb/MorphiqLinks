@@ -1,0 +1,11 @@
+{
+  "name": "morphiq-links",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "check": "node --check api/track.js && node --check api/go.js && node --check api/admin/login.js && node --check api/admin/stats.js && node --check public/app.js && node --check public/admin.js"
+  },
+  "engines": { "node": ">=20" }
+}
