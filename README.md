@@ -4,7 +4,7 @@ Landing de contacto para el QR de las tarjetas de Miguel Huerta Bautista. Interf
 
 ## Despliegue en Vercel
 
-1. El proyecto Vercel `morphiq-links` está publicado y vinculado con `M1gu3hb/MorphiqLinks`; los cambios en `main` se despliegan automáticamente. Framework: **Other**. Los archivos públicos están en `public`.
+1. El proyecto Vercel `morphiq-links` está publicado y vinculado con `M1gu3hb/MorphiqLinks`; los cambios en `main` se despliegan automáticamente. Framework: **Other**. Los archivos públicos están en `public`; la landing usa `public/public.css` y `public/app.js` (fondo ASCII en canvas, sin dependencias).
 2. Conecta una base **Upstash Redis** mediante Vercel Marketplace. Configura las variables de producción y preview:
    - `UPSTASH_REDIS_REST_URL`
    - `UPSTASH_REDIS_REST_TOKEN`
