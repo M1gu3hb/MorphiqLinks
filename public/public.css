@@ -3,12 +3,13 @@
 html{min-height:100%;background:var(--bg)}
 body{margin:0;min-height:100vh;min-height:100dvh;background:var(--bg);color:var(--ink);overflow-x:hidden;-webkit-tap-highlight-color:transparent}
 a{color:inherit}
+#fx{position:fixed;inset:0;width:100%;height:100%;z-index:5;pointer-events:none;display:block}
 #bg{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block}
 .vignette{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse 70% 60% at 50% 46%,#03050b99 0%,#03050b55 55%,transparent 100%),radial-gradient(ellipse at center,transparent 55%,#03050bcc 100%)}
-.scan{position:fixed;inset:0;z-index:2;pointer-events:none;opacity:.35;background:repeating-linear-gradient(0deg,#0000 0 2px,#00000038 2px 3px);mix-blend-mode:multiply}
+.scan{position:fixed;inset:0;z-index:2;pointer-events:none;opacity:.18;background:repeating-linear-gradient(0deg,#0000 0 2px,#00000038 2px 3px);}
 main{position:relative;z-index:3;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(18px,3.4vh,34px);padding:clamp(22px,5vh,56px) 18px;perspective:1100px}
 .mono{font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace}
-.logo-wrap{position:relative;width:min(470px,86vw);filter:drop-shadow(0 0 28px #2b7dff55);transform-style:preserve-3d;will-change:transform}
+.logo-wrap{position:relative;width:min(470px,86vw);transform-style:preserve-3d;will-change:transform}
 .logo-wrap img{display:block;width:100%;height:auto;user-select:none;-webkit-user-drag:none}
 .tag{margin:0;text-align:center;font-size:.72rem;letter-spacing:.34em;color:#8fb6ea;text-transform:uppercase;min-height:1.2em}
 .hero{text-align:center}
@@ -17,7 +18,7 @@ h1{margin:0;font-family:Sora,"Space Grotesk",Arial,sans-serif;font-weight:600;le
 h1 .dot{color:var(--blue)}
 .role{margin:12px 0 0;color:#c4d0e4;font-size:clamp(.92rem,2.6vw,1.02rem);text-shadow:0 2px 14px #000}
 .links{width:min(520px,100%);display:grid;gap:12px;margin:0;padding:0;list-style:none}
-.link{--a:#38aaff;--rgb:56,170,255;position:relative;display:flex;align-items:center;gap:16px;min-height:76px;padding:12px 18px;text-decoration:none;border-radius:16px;border:1px solid rgba(var(--rgb),.45);background:linear-gradient(110deg,rgba(var(--rgb),.2),rgba(6,10,20,.66) 60%),rgba(6,10,20,.55);backdrop-filter:blur(10px) saturate(1.3);-webkit-backdrop-filter:blur(10px) saturate(1.3);overflow:hidden;isolation:isolate;transform-style:preserve-3d;will-change:transform;box-shadow:0 10px 34px #0008,0 0 24px rgba(var(--rgb),.14);transition:border-color .25s,box-shadow .25s}
+.link{--a:#38aaff;--rgb:56,170,255;position:relative;display:flex;align-items:center;gap:16px;min-height:76px;padding:12px 18px;text-decoration:none;border-radius:16px;border:1px solid rgba(var(--rgb),.45);background:linear-gradient(110deg,rgba(var(--rgb),.2),rgba(6,10,20,.78) 60%),rgba(6,10,20,.72);overflow:hidden;isolation:isolate;transform-style:preserve-3d;will-change:transform;box-shadow:0 10px 34px #0008;transition:border-color .25s,box-shadow .25s}
 .link::before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(var(--rgb),.34),transparent 65%);opacity:0;transition:opacity .25s}
 .link::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.16) 50%,transparent 65%);transform:translateX(-120%)}
 .link:hover,.link:focus-visible{border-color:var(--a);box-shadow:0 14px 40px #000a,0 0 38px rgba(var(--rgb),.4);outline:none}
@@ -27,10 +28,8 @@ h1 .dot{color:var(--blue)}
 .link:active{transform:scale(.985)!important}
 .wa{--a:#31db80;--rgb:49,219,128}.call{--a:#38aaff;--rgb:56,170,255}.mail{--a:#33d1f5;--rgb:51,209,245}.site{--a:#7d8cff;--rgb:125,140,255}
 .sheen{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;font:600 11px/11px "JetBrains Mono",ui-monospace,monospace;color:var(--a);word-break:break-all;white-space:normal;opacity:.9;text-shadow:0 0 8px rgba(var(--rgb),.9);-webkit-mask-image:linear-gradient(105deg,transparent 40%,#000 50%,transparent 60%);mask-image:linear-gradient(105deg,transparent 40%,#000 50%,transparent 60%);-webkit-mask-size:300% 100%;mask-size:300% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:100% 0;mask-position:100% 0}
-body.go .sheen{animation:sweep 7s cubic-bezier(.4,0,.2,1) infinite;animation-delay:calc(2.4s + var(--i,0)*.9s)}
-body.go .link{animation:beckon 7s ease-in-out infinite;animation-delay:calc(2.4s + var(--i,0)*.9s)}
+body.go .sheen{animation:sweep 7s cubic-bezier(.4,0,.2,1) infinite;animation-delay:calc(1s + var(--i,0)*.9s)}
 @keyframes sweep{0%{-webkit-mask-position:100% 0;mask-position:100% 0}22%,100%{-webkit-mask-position:0 0;mask-position:0 0}}
-@keyframes beckon{0%,26%,100%{border-color:rgba(var(--rgb),.45);box-shadow:0 10px 34px #0008,0 0 24px rgba(var(--rgb),.14)}10%{border-color:var(--a);box-shadow:0 10px 34px #0008,0 0 44px rgba(var(--rgb),.6),inset 0 0 22px rgba(var(--rgb),.22)}}
 .copy,.ico,.arrow{position:relative;z-index:1}
 .ico{flex:none;width:46px;height:46px;border-radius:12px;display:grid;place-items:center;color:var(--a);background:rgba(var(--rgb),.16);border:1px solid rgba(var(--rgb),.5);box-shadow:inset 0 0 16px rgba(var(--rgb),.16),0 0 16px rgba(var(--rgb),.25);transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
 .ico svg{width:23px;height:23px;fill:currentColor}
@@ -41,20 +40,12 @@ body.go .link{animation:beckon 7s ease-in-out infinite;animation-delay:calc(2.4s
 .copy small{font-size:.78rem;color:#b9c8de;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:"JetBrains Mono",ui-monospace,monospace;letter-spacing:-.01em}
 .arrow{margin-left:auto;font-size:1.35rem;color:var(--a);text-shadow:0 0 14px rgba(var(--rgb),.7);transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
 .link:hover .arrow{transform:translate(4px,-4px)}
-/* Revelación: todo entra desfragmentado y se recompone */
-.frag{opacity:0}
-body.go .frag{animation:frag .9s cubic-bezier(.16,1,.3,1) both;animation-delay:var(--d,0s)}
-@keyframes frag{
-  0%{opacity:0;transform:translate(var(--fx,0),var(--fy,30px)) rotate(var(--fr,0deg)) scale(.92);clip-path:inset(var(--c1,0) 0 var(--c2,60%) 0);filter:blur(6px) hue-rotate(60deg)}
-  35%{opacity:1;clip-path:inset(var(--c3,40%) 0 0 0);filter:blur(2px)}
-  55%{transform:translate(calc(var(--fx,0)*-.25),0) skewX(6deg);clip-path:inset(0 0 var(--c4,30%) 0)}
-  75%{transform:translate(4px,0) skewX(-3deg);clip-path:inset(0);filter:none}
-  100%{opacity:1;transform:none;clip-path:inset(0);filter:none}
-}
-body.go .float{animation:frag .9s cubic-bezier(.16,1,.3,1) both,bob 7s ease-in-out 1.6s infinite}
-@keyframes bob{50%{transform:translateY(-6px)}}
-.glitch{animation:glitch 6s steps(1) infinite}
-@keyframes glitch{0%,93%,100%{transform:none;text-shadow:0 6px 34px #000c,0 0 40px #2b7dff40}94%{transform:translate(-2px,0);text-shadow:2px 0 #ff2bd6,-2px 0 #2bf0ff}96%{transform:translate(2px,1px);text-shadow:-2px 0 #ff2bd6,2px 0 #2bf0ff}98%{transform:none}}
+/* Revelación: los elementos aparecen cuando su versión ASCII se fragmenta (ver app.js) */
+.frag{opacity:0;transition:opacity .3s ease-out}
+.frag.in{opacity:1}
+.link.pulse-on .pulse{animation:beckon 7s ease-in-out infinite;animation-delay:calc(1s + var(--i,0)*.9s)}
+.pulse{position:absolute;inset:0;z-index:2;pointer-events:none;border-radius:inherit;opacity:0;box-shadow:inset 0 0 0 1px var(--a),inset 0 0 26px rgba(var(--rgb),.35),0 0 30px rgba(var(--rgb),.55)}
+@keyframes beckon{0%,26%,100%{opacity:0}10%{opacity:1}}
 @media(max-width:520px){.link{min-height:70px;gap:13px;padding:10px 14px}.ico{width:42px;height:42px}.copy strong{font-size:.96rem}.tag{letter-spacing:.24em;font-size:.64rem}}
 @media(max-height:700px) and (min-width:700px){main{gap:12px}.links{gap:8px}.link{min-height:64px}}
-@media(prefers-reduced-motion:reduce){.sheen{display:none}body.go .link{animation:none}body.go .frag,body.go .float{animation:none;opacity:1}.glitch{animation:none}.scan{display:none}}
+@media(prefers-reduced-motion:reduce){.sheen,.pulse,#fx{display:none}.frag{opacity:1;transition:none}.scan{display:none}}
