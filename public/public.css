@@ -13,7 +13,7 @@ main{position:relative;z-index:3;min-height:100vh;min-height:100dvh;display:flex
 .tag{margin:0;text-align:center;font-size:.72rem;letter-spacing:.34em;color:#8fb6ea;text-transform:uppercase;min-height:1.2em}
 .hero{text-align:center}
 .hello{margin:0 0 6px;font-size:.78rem;letter-spacing:.3em;color:var(--cyan);font-weight:600}
-h1{margin:0;font-family:Syne,"Space Grotesk",Arial,sans-serif;font-weight:800;letter-spacing:-.045em;line-height:1.02;font-size:clamp(2.3rem,7.4vw,4.1rem);text-shadow:0 6px 34px #000c,0 0 40px #2b7dff40}
+h1{margin:0;font-family:Sora,"Space Grotesk",Arial,sans-serif;font-weight:600;letter-spacing:-.04em;line-height:1.06;font-size:clamp(2.3rem,7.4vw,4.1rem);text-shadow:0 6px 34px #000c,0 0 40px #2b7dff40}
 h1 .dot{color:var(--blue)}
 .role{margin:12px 0 0;color:#c4d0e4;font-size:clamp(.92rem,2.6vw,1.02rem);text-shadow:0 2px 14px #000}
 .links{width:min(520px,100%);display:grid;gap:12px;margin:0;padding:0;list-style:none}
@@ -26,6 +26,12 @@ h1 .dot{color:var(--blue)}
 .link:focus-visible{outline:2px solid var(--a);outline-offset:3px}
 .link:active{transform:scale(.985)!important}
 .wa{--a:#31db80;--rgb:49,219,128}.call{--a:#38aaff;--rgb:56,170,255}.mail{--a:#33d1f5;--rgb:51,209,245}.site{--a:#7d8cff;--rgb:125,140,255}
+.sheen{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;font:600 11px/11px "JetBrains Mono",ui-monospace,monospace;color:var(--a);word-break:break-all;white-space:normal;opacity:.9;text-shadow:0 0 8px rgba(var(--rgb),.9);-webkit-mask-image:linear-gradient(105deg,transparent 40%,#000 50%,transparent 60%);mask-image:linear-gradient(105deg,transparent 40%,#000 50%,transparent 60%);-webkit-mask-size:300% 100%;mask-size:300% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:100% 0;mask-position:100% 0}
+body.go .sheen{animation:sweep 7s cubic-bezier(.4,0,.2,1) infinite;animation-delay:calc(2.4s + var(--i,0)*.9s)}
+body.go .link{animation:beckon 7s ease-in-out infinite;animation-delay:calc(2.4s + var(--i,0)*.9s)}
+@keyframes sweep{0%{-webkit-mask-position:100% 0;mask-position:100% 0}22%,100%{-webkit-mask-position:0 0;mask-position:0 0}}
+@keyframes beckon{0%,26%,100%{border-color:rgba(var(--rgb),.45);box-shadow:0 10px 34px #0008,0 0 24px rgba(var(--rgb),.14)}10%{border-color:var(--a);box-shadow:0 10px 34px #0008,0 0 44px rgba(var(--rgb),.6),inset 0 0 22px rgba(var(--rgb),.22)}}
+.copy,.ico,.arrow{position:relative;z-index:1}
 .ico{flex:none;width:46px;height:46px;border-radius:12px;display:grid;place-items:center;color:var(--a);background:rgba(var(--rgb),.16);border:1px solid rgba(var(--rgb),.5);box-shadow:inset 0 0 16px rgba(var(--rgb),.16),0 0 16px rgba(var(--rgb),.25);transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
 .ico svg{width:23px;height:23px;fill:currentColor}
 .ico svg.st{fill:none}
@@ -51,4 +57,4 @@ body.go .float{animation:frag .9s cubic-bezier(.16,1,.3,1) both,bob 7s ease-in-o
 @keyframes glitch{0%,93%,100%{transform:none;text-shadow:0 6px 34px #000c,0 0 40px #2b7dff40}94%{transform:translate(-2px,0);text-shadow:2px 0 #ff2bd6,-2px 0 #2bf0ff}96%{transform:translate(2px,1px);text-shadow:-2px 0 #ff2bd6,2px 0 #2bf0ff}98%{transform:none}}
 @media(max-width:520px){.link{min-height:70px;gap:13px;padding:10px 14px}.ico{width:42px;height:42px}.copy strong{font-size:.96rem}.tag{letter-spacing:.24em;font-size:.64rem}}
 @media(max-height:700px) and (min-width:700px){main{gap:12px}.links{gap:8px}.link{min-height:64px}}
-@media(prefers-reduced-motion:reduce){body.go .frag,body.go .float{animation:none;opacity:1}.glitch{animation:none}.scan{display:none}}
+@media(prefers-reduced-motion:reduce){.sheen{display:none}body.go .link{animation:none}body.go .frag,body.go .float{animation:none;opacity:1}.glitch{animation:none}.scan{display:none}}

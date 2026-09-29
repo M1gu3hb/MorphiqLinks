@@ -145,6 +145,15 @@
   if (logo && !logo.complete) { logo.addEventListener('load', go, { once: true }); logo.addEventListener('error', go, { once: true }); setTimeout(go, 1500); }
   else go();
 
+  // ---- Reflejo ASCII que cruza cada tarjeta cada cierto tiempo ----
+  const SHEEN = '01<>/\\|[]{}$#%&*+=-:.';
+  document.querySelectorAll('.link').forEach(a => {
+    const el = document.createElement('span'); el.className = 'sheen'; el.setAttribute('aria-hidden', 'true');
+    const n = Math.ceil(a.offsetWidth / 6.6) * Math.ceil((a.offsetHeight || 80) / 11);
+    let str = ''; for (let i = 0; i < n; i++) str += SHEEN[(Math.random() * SHEEN.length) | 0];
+    el.textContent = str; a.prepend(el);
+  });
+
   // ---- Interacción: tilt 3D + foco de luz en cada enlace, parallax del logo ----
   const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
   if (fine && !reduce) {
