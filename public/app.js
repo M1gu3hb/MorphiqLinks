@@ -15,11 +15,21 @@
   const hash = (x, y) => { const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return s - Math.floor(s); };
   const FONT = 'ui-monospace, Menlo, Consolas, monospace';
 
+  // Ajusta el tamaño del escenario (todo está en rem) para llenar la pantalla en cualquier dispositivo
+  const stage = document.querySelector('.stage');
+  function fit() {
+    const de = document.documentElement, fs = parseFloat(getComputedStyle(de).fontSize) || 16;
+    const r = stage.getBoundingClientRect(), w = r.width / fs, h = r.height / fs;
+    const v = Math.min(innerWidth * .94 / w, innerHeight * .95 / h);
+    de.style.fontSize = Math.max(9, Math.min(22, v)).toFixed(2) + 'px';
+  }
+
   function resize() {
+    fit();
     dpr = Math.min(devicePixelRatio || 1, 1.25);
     W = innerWidth; H = innerHeight;
     for (const c of [canvas, fx]) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
-    const base = W < 620 ? 11 : W > 1700 ? 16 : 13;
+    const base = Math.max(10, Math.min(16, Math.round(Math.min(W, H) / 30)));
     cw = base; ch = Math.round(base * 1.55);
     cols = Math.ceil(W / cw); rows = Math.ceil(H / ch);
     for (const c of [ctx, fctx]) {
@@ -201,7 +211,7 @@
   function decorate() {
     document.querySelectorAll('.link').forEach(a => {
       const el = document.createElement('span'); el.className = 'sheen'; el.setAttribute('aria-hidden', 'true');
-      const n = Math.ceil(a.offsetWidth / 6.6) * Math.ceil((a.offsetHeight || 80) / 11);
+      const n = (() => { const u = parseFloat(getComputedStyle(document.documentElement).fontSize) * .6875; return Math.ceil(a.offsetWidth / (u * .6)) * Math.ceil(a.offsetHeight / u); })();
       let str = ''; for (let i = 0; i < n; i++) str += SHEEN[(Math.random() * SHEEN.length) | 0];
       el.textContent = str; a.prepend(el);
       const p = document.createElement('span'); p.className = 'pulse'; p.setAttribute('aria-hidden', 'true'); a.append(p);
@@ -252,6 +262,7 @@
       logo.complete ? 0 : new Promise(r => { logo.onload = logo.onerror = r; setTimeout(r, 1500); })
     ]);
     ready.then(() => {
+      fit();
       try { targets.forEach(rasterize); } catch (e) { targets.forEach(tg => tg.el.classList.add('in')); document.body.classList.add('go'); return; }
       t0 = performance.now();
       intro = { start: performance.now(), done: false };
