@@ -1,5 +1,6 @@
 export const links = Object.freeze({
   whatsapp: { label: 'WhatsApp', url: 'https://wa.me/525523118153' },
+  facebook: { label: 'Facebook', url: 'https://www.facebook.com/share/1Ch5kp27LR/' },
   llamada: { label: 'Llamada', url: 'tel:+525523118153' },
   correo: { label: 'Correo', url: 'mailto:contacto@morphiq.com.mx' },
   sitio: { label: 'Sitio web', url: 'https://morphiq.com.mx' }

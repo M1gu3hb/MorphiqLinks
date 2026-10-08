@@ -31,7 +31,7 @@ h1 .dot{color:var(--blue)}
 .link:hover::after,.link:focus-visible::after{transform:translateX(120%);transition:transform .8s ease}
 .link:focus-visible{outline:2px solid var(--a);outline-offset:3px}
 .link:active{transform:scale(.985)!important}
-.wa{--a:#31db80;--rgb:49,219,128}.call{--a:#38aaff;--rgb:56,170,255}.mail{--a:#33d1f5;--rgb:51,209,245}.site{--a:#7d8cff;--rgb:125,140,255}
+.wa{--a:#31db80;--rgb:49,219,128}.fb{--a:#3b8cff;--rgb:59,140,255}.call{--a:#38aaff;--rgb:56,170,255}.mail{--a:#33d1f5;--rgb:51,209,245}.site{--a:#7d8cff;--rgb:125,140,255}
 .sheen{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;font:600 .6875rem/.6875rem "JetBrains Mono",ui-monospace,monospace;color:var(--a);word-break:break-all;white-space:normal;opacity:.9;text-shadow:0 0 8px rgba(var(--rgb),.9);-webkit-mask-image:linear-gradient(105deg,transparent 40%,#000 50%,transparent 60%);mask-image:linear-gradient(105deg,transparent 40%,#000 50%,transparent 60%);-webkit-mask-size:300% 100%;mask-size:300% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:100% 0;mask-position:100% 0}
 body.go .sheen{animation:sweep 7s cubic-bezier(.4,0,.2,1) infinite;animation-delay:calc(1s + var(--i,0)*.9s)}
 @keyframes sweep{0%{-webkit-mask-position:100% 0;mask-position:100% 0}22%,100%{-webkit-mask-position:0 0;mask-position:0 0}}

@@ -1,5 +1,5 @@
 const $ = id => document.getElementById(id);
-const ids = ['whatsapp', 'llamada', 'correo', 'sitio'];
+const ids = ['whatsapp', 'facebook', 'llamada', 'correo', 'sitio'];
 const integer = new Intl.NumberFormat('es-MX');
 const percent = (n, total) => total ? Math.round(n / total * 100) + '%' : '0%';
 const sum = (rows, field) => rows.reduce((acc, row) => acc + (row[field] || 0), 0);
