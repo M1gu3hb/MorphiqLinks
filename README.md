@@ -14,4 +14,6 @@ Landing de contacto para el QR de las tarjetas de Miguel Huerta Bautista. Interf
 
 El backend reside en Vercel Functions (`api/`). Si Redis falla, los enlaces siguen funcionando, pero no cuentan el clic; el panel muestra un error en vez de datos inventados. Los eventos se agregan por día en la zona `America/Mexico_City`. Cada sesión anónima dura 12 horas. No se guarda IP en las estadísticas; Redis usa la IP temporalmente para limitar los intentos de contraseña. Los clics son aperturas de enlace, no llamadas o mensajes completados.
 
+Al abrir, un QR a pantalla completa se escanea y sus módulos vuelan a armar el logo en su lugar (`public/app.js`, sección «Splash»); un toque lo salta y con «reducir movimiento» no aparece. El QR dibujado es el de `https://morphiq-links.vercel.app` y los tres cuadritos se ubican por coordenadas dentro de `public/logo.png`: si cambia el dominio o el logo, actualiza las constantes `QR` y `SQ`.
+
 Las URL y etiquetas se editan en `api/_config.js`, y el texto visible en `public/index.html`. Al cambiar un enlace, modifica ambos y despliega de nuevo. No imprimas el QR hasta confirmar que la URL de producción funciona y permanece estable.
