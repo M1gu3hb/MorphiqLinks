@@ -322,7 +322,11 @@
     const lit = s.read !== null && t >= s.read && t < s.read + .22;
     let scan = -1;
     if (t >= .95 && (s.read === null || t < s.read - .02)) { const u = (t - .95) % .62; if (u <= .5) scan = io2(u / .5); }
-    const R = tf >= 0 ? logoImg.getBoundingClientRect() : null;   // se sigue el logo real, por si la página se reacomoda
+    let R = null;
+    if (tf >= 0) { // se sigue el logo real, por si la página se reacomoda; redondeado a pixeles enteros es como más coincide con el que pinta el navegador
+      const b = logoImg.getBoundingClientRect();
+      R = { left: Math.round(b.left), top: Math.round(b.top), width: b.width, height: b.height };
+    }
 
     if (tf > .52) { // el logo aparece de izquierda a derecha, al ritmo en que aterrizan los pixeles
       const tc = s.tmp.getContext('2d'), w = s.tmp.width, h = s.tmp.height, tt = tf - .52, sh = (tf - 1.3) / .6;
