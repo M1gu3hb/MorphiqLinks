@@ -20,7 +20,9 @@
   function fit() {
     const de = document.documentElement, fs = parseFloat(getComputedStyle(de).fontSize) || 16;
     const r = stage.getBoundingClientRect(), w = r.width / fs, h = r.height / fs;
-    const v = Math.min(innerWidth * .94 / w, innerHeight * .95 / h);
+    // El ancho real es clientWidth: en Chrome de Android innerWidth crece si algo se sale de la pantalla y el escenario quedaba cortado en teléfonos angostos
+    const cw = de.clientWidth || innerWidth, z = Math.min(1, cw / innerWidth);
+    const v = Math.min(cw * .94 / w, innerHeight * z * .95 / h);
     de.style.fontSize = Math.max(9, Math.min(22, v)).toFixed(2) + 'px';
   }
 

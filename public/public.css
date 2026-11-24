@@ -9,13 +9,14 @@ a{color:inherit}
 #qr{position:fixed;inset:0;width:100%;height:100%;z-index:6;display:block;background:#03050b}
 .vignette{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse 70% 60% at 50% 46%,#03050b99 0%,#03050b55 55%,transparent 100%),radial-gradient(ellipse at center,transparent 55%,#03050bcc 100%)}
 .scan{position:fixed;inset:0;z-index:2;pointer-events:none;opacity:.18;background:repeating-linear-gradient(0deg,#0000 0 2px,#00000038 2px 3px);}
-html{font-size:16px}
+/* Antes de que app.js ajuste el tamaño, el escenario (27rem, o 56rem en horizontal) ya cabe en el ancho: nada se sale de la pantalla */
+html{font-size:min(16px,3.48vw)}
 main{position:relative;z-index:3;min-height:100vh;min-height:100dvh;display:grid;place-items:center;perspective:1100px}
 /* Escenario de tamaño fijo (en rem): app.js ajusta el font-size de html para que llene la pantalla en cualquier dispositivo */
 .stage{width:27rem;display:flex;flex-direction:column;align-items:center;gap:1.7rem}
 .stage nav{width:100%}
 .head{display:flex;flex-direction:column;align-items:center;gap:1.7rem;width:100%}
-@media(orientation:landscape) and (max-height:620px){.stage{width:56rem;flex-direction:row;gap:2.6rem;align-items:center}.head{width:27rem;flex:none}.stage nav{flex:1}}
+@media(orientation:landscape) and (max-height:620px){html{font-size:min(16px,1.67vw)}.stage{width:56rem;flex-direction:row;gap:2.6rem;align-items:center}.head{width:27rem;flex:none}.stage nav{flex:1}}
 .mono{font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace}
 .logo-wrap{position:relative;width:100%;transform-style:preserve-3d;will-change:transform}
 .logo-wrap img{display:block;width:100%;height:auto;user-select:none;-webkit-user-drag:none}
